@@ -1,9 +1,9 @@
-Name: YOUR NAME HERE
+Name: Liliana Dhaliwal
 
-| Date    |  Time  |                                     Update |
-|:--------|:------:|-------------------------------------------:|
-| April 5 | 9-10pm | I tried to write abstract, efficient code. |
-|         |        |                                            |
+| Date       |    Time    |                                                                                                                                                                                                                                                                                                                                                     Update |
+|:-----------|:----------:|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| December 2 | 9:15-10am  |                                                                                                         brainstormed and worked on pseudocode. The idea I have right now seems like it could work logically, but won't be great in terms of run time/efficiency. not sure if I'm going to bother to try to turn it into actual code or try a new approach. |
+| December 4 | 10-10;35pm | tried to do a new approach to compressing by just looking for runs of repeated letters, but i tried to run it and ended up with it compressing to 0 bits so no success. ran into some problems trying to get the character representations of number into integers, but i think I kinda solved it? definitely not the most code efficient way of doing it. |
 
 
 To add a new row to the table, click into a cell and then hit shift-enter.
