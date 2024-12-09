@@ -28,57 +28,51 @@
  *  @author Zach Blick, Liliana Dhaliwal
  */
 public class TextCompressor {
+    public static int EOF = 128;
+
+    //while index < text.length:
+    //	prefix = longest coded word that matches text @ index
+    //	write out that code
+    //	if possible, look ahead to the next character
+    //	append that character to prefix
+    //	associate prefix with the next code (if available)
+    //	index += prefix.length
+    //write out EOF and close
 
     private static void compress() {
-        // TODO: Complete the compress() method
+        // Create TST
+        TST trie = new TST();
 
-        StringBuilder input = new StringBuilder();
-
-        // Read input data
-        while (!BinaryStdIn.isEmpty()) {
-            char c = BinaryStdIn.readChar();
-            input.append(c);
+        // Fill TST with existing alphabet
+        for (int i = 0; i < 128; i++){
+            trie.insert(String.valueOf(i), i);
         }
 
-        StringBuilder compressed = new StringBuilder();
-        int count = 1;
+        // Read data into a String
+        String text = BinaryStdIn.readString();
 
+        int index = 0;
+        int code = 129;
 
-        // Go through the text and compress when you find runs of the same letter
-        for (int i = 1; i < input.length(); i++) {
-            if (count >= 255){
-                compressed.append(count);
-                compressed.append(input.charAt(i - 1));
-                count = 1;
+        while (index < text.length()){
+            // Get the prefix
+            String prefix = trie.getLongestPrefix(text);
+
+            // Add to the output file
+            BinaryStdOut.write(prefix, 12);
+
+            // If we can look at the next character, add it to the prefix
+            if ((prefix.length()) < text.length()){
+                trie.insert(text.substring(0, prefix.length() + 1), code);
+                code++;
             }
-            else if (input.charAt(i) == input.charAt(i - 1)) {
-                count++;
-            }
-            else {
-                compressed.append(count);
-                compressed.append(input.charAt(i - 1));
-                count = 1;
-            }
+
+            // Move the text forward to start where the previous prefix ended
+            text = text.substring(prefix.length());
         }
 
-        // add the last character & its count
-        compressed.append(count);
-        compressed.append(input.charAt(input.length() - 1));
-
-        // loop through the text with a window of set a size (test later to see what works best)
-            // check each window possibility, shifting by one and save to a dictionary if its not already ther
-            // if it is there, increment count of that sequence
-
-        // order the dictionary by most occurrences
-        // take the 204(?) most common and give them keys
-
-        // write out length of dictionary
-        // write out dictionary as the header
-
-        // loop through the text again
-            // if the window matches one of the most common, write out with its key
-            // else loop through the three and add each one to output
-
+        // Write out
+        BinaryStdOut.write(EOF, 12);
         BinaryStdOut.close();
     }
 
