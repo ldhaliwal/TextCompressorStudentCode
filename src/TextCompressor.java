@@ -58,15 +58,13 @@ public class TextCompressor {
             BinaryStdOut.write(prefixCode, NUM_BITS);
 
             // If we can look at the next character, add it to the prefix
-            if (prefix.length() < text.length() && code < MAX_CODES){
-                trie.insert(text.substring(0, prefix.length() + 1), code);
+            if (i + prefix.length() < text.length() && code < MAX_CODES){
+                trie.insert(prefix + text.charAt(i + prefix.length()), code);
                 code++;
             }
 
+            // Moves index forward
             i += prefix.length();
-
-//            // Move the text forward to start where the previous prefix ended
-//            text = text.substring(prefix.length());
         }
 
         // Write out EOF indicator
@@ -93,7 +91,7 @@ public class TextCompressor {
         // Get the text value of the first code
         String textValue = codes[currentCode];
 
-        while (currentCode != EOF) {
+        while (true) {
             // Write out the current code
             BinaryStdOut.write(textValue);
 
