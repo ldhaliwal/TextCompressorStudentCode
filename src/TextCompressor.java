@@ -28,6 +28,7 @@
  *  @author Zach Blick, Liliana Dhaliwal
  */
 public class TextCompressor {
+    public static final int NUM_BITS = 12;
     public static final int EOF = 256;
     public static final int MAX_CODES = 4096;
 
@@ -46,13 +47,15 @@ public class TextCompressor {
         // Set the first possible code
         int code = EOF + 1;
 
-        while (!text.isEmpty()){
-            // Get the prefix
-            String prefix = trie.getLongestPrefix(text);
+        int i = 0;
+
+        while (i < text.length()){
+            // Get the prefix and its code representation
+            String prefix = trie.getLongestPrefix(text, i);
             int prefixCode = trie.lookup(prefix);
 
             // Add to the output file
-            BinaryStdOut.write(prefixCode, 12);
+            BinaryStdOut.write(prefixCode, NUM_BITS);
 
             // If we can look at the next character, add it to the prefix
             if (prefix.length() < text.length() && code < MAX_CODES){
@@ -60,23 +63,29 @@ public class TextCompressor {
                 code++;
             }
 
-            // Move the text forward to start where the previous prefix ended
-            text = text.substring(prefix.length());
+            i += prefix.length();
+
+//            // Move the text forward to start where the previous prefix ended
+//            text = text.substring(prefix.length());
         }
 
         // Write out EOF indicator
-        BinaryStdOut.write(EOF, 12);
+        BinaryStdOut.write(EOF, NUM_BITS);
         BinaryStdOut.close();
     }
 
     private static void expand() {
+        // Create a map for easy code/value lookup
         String[] codes = new String[MAX_CODES];
-        int index = EOF + 1;
+        int nextCode = EOF + 1;
 
-        // Fill TST with ascii values
+        // Fill map with ascii values
         for (int i = 0; i < EOF; i++){
-            codes[i] = String.valueOf(i);
+            codes[i] = "" + (char) i;
         }
+
+        int lookaheadCode;
+        String nextTextValue;
 
         // Read in the first code
         int currentCode = BinaryStdIn.readInt(12);
@@ -89,27 +98,31 @@ public class TextCompressor {
             BinaryStdOut.write(textValue);
 
             // Read the lookahead code
-            currentCode = BinaryStdIn.readInt(12);
+            lookaheadCode = BinaryStdIn.readInt(12);
+
+            // Checks if we are at the end of the file
+            if (lookaheadCode == EOF){
+                break;
+            }
+
+            // Checks for the edge case: If the lookahead code is not yet defined, make a new code using the current code's value
+            if (nextCode == lookaheadCode){
+                codes[nextCode] = textValue + textValue.charAt(0);
+            }
 
             // Get the string value of the lookahead code
-            textValue = codes[currentCode];
-
-            // Edge case: If the lookahead code is not yet defined, make a new code using the current code
-            if (index == currentCode){
-                textValue = textValue + textValue.charAt(0);
-            }
+            nextTextValue = codes[lookaheadCode];
 
             // As long as we haven't filled all the codes, create another one and write it out
-            if (index < MAX_CODES){
-                index++;
-                codes[index] = textValue + textValue.charAt(0); // Add new entry to code table.
+            if (nextCode < MAX_CODES && nextCode != EOF){
+                codes[nextCode] = textValue + nextTextValue.charAt(0);
+                nextCode++;
             }
 
-            //textValue = nextCode; // Update current codeword.
+            // Updates the values of the current code and text value;
+            currentCode = lookaheadCode;
+            textValue = nextTextValue;
         }
-        // Write out the EOF value
-        BinaryStdOut.write(EOF);
-
         BinaryStdOut.close();
     }
 
