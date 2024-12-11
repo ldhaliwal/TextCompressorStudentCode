@@ -28,7 +28,8 @@
  *  @author Zach Blick, Liliana Dhaliwal
  */
 public class TextCompressor {
-    public static int EOF = 128;
+    public static int EOF = 256;
+    public static int MAX_CODES = 4096;
 
     //while index < text.length:
     //	prefix = longest coded word that matches text @ index
@@ -44,17 +45,17 @@ public class TextCompressor {
         TST trie = new TST();
 
         // Fill TST with existing alphabet
-        for (int i = 0; i < 128; i++){
+        for (int i = 0; i < EOF; i++){
             trie.insert(String.valueOf(i), i);
         }
 
         // Read data into a String
         String text = BinaryStdIn.readString();
 
-        int index = 0;
-        int code = 129;
+        // Set the first possible code
+        int code = EOF + 1;
 
-        while (index < text.length()){
+        while (!text.isEmpty()){
             // Get the prefix
             String prefix = trie.getLongestPrefix(text);
 
@@ -62,52 +63,61 @@ public class TextCompressor {
             BinaryStdOut.write(prefix, 12);
 
             // If we can look at the next character, add it to the prefix
-            if ((prefix.length()) < text.length()){
+            if ((prefix.length() + 1) < text.length() && code < MAX_CODES){
                 trie.insert(text.substring(0, prefix.length() + 1), code);
                 code++;
             }
 
             // Move the text forward to start where the previous prefix ended
             text = text.substring(prefix.length());
+
         }
 
-        // Write out
+        // Write out EOF indicator
         BinaryStdOut.write(EOF, 12);
         BinaryStdOut.close();
     }
 
     private static void expand() {
+        String[] codes = new String[MAX_CODES];
+        int index = EOF + 1;
 
-        // TODO: Complete the expand() method
-
-        StringBuilder input = new StringBuilder();
-
-        // Read input data
-        while (!BinaryStdIn.isEmpty()) {
-            char c = BinaryStdIn.readChar();
-            input.append(c);
+        // Fill TST with ascii values
+        for (int i = 0; i < EOF; i++){
+            codes[i] = String.valueOf(i);
         }
 
-        StringBuilder expanded = new StringBuilder();
+        // Read in the first code
+        int currentCode = BinaryStdIn.readInt(12);
 
-        for(int i = 0; i < input.length(); i++) {
-            int count = Integer.parseInt(String.valueOf(input.charAt(i)));
-            char c = input.charAt(i);
-            for (int j = 0; j < count; j++){
-                expanded.append(c);
+        // Get the text value of the first code
+        String textValue = codes[currentCode];
+
+        while (currentCode != EOF) {
+            // Write out the current code
+            BinaryStdOut.write(textValue);
+
+            // Read the lookahead code
+            currentCode = BinaryStdIn.readInt(12);
+
+            // Get the string value of the lookahead code
+            textValue = codes[currentCode];
+
+            // Edge case: If the lookahead code is not yet defined, make a new code using the current code
+            if (index == currentCode){
+                textValue = textValue + textValue.charAt(0);
             }
+
+            // As long as we haven't filled all the codes, create another one and write it out
+            if (index < MAX_CODES){
+                index++;
+                codes[index] = textValue + textValue.charAt(0); // Add new entry to code table.
+            }
+
+            //textValue = nextCode; // Update current codeword.
         }
-
-        for (int i = 0; i < expanded.length(); i++){
-            BinaryStdOut.write(expanded.charAt(i));
-        }
-
-        // read in the header and save to dictionary as an actual dictionary
-
-        // read in the rest of the data 8 bits at a time
-        // if the 8 bits match something in the dictionary, replace it and write it out
-        // else write it out as is
-
+        // Write out the EOF value
+        BinaryStdOut.write(textValue);
 
         BinaryStdOut.close();
     }
