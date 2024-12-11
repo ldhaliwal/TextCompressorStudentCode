@@ -28,17 +28,8 @@
  *  @author Zach Blick, Liliana Dhaliwal
  */
 public class TextCompressor {
-    public static int EOF = 256;
-    public static int MAX_CODES = 4096;
-
-    //while index < text.length:
-    //	prefix = longest coded word that matches text @ index
-    //	write out that code
-    //	if possible, look ahead to the next character
-    //	append that character to prefix
-    //	associate prefix with the next code (if available)
-    //	index += prefix.length
-    //write out EOF and close
+    public static final int EOF = 256;
+    public static final int MAX_CODES = 4096;
 
     private static void compress() {
         // Create TST
@@ -46,7 +37,7 @@ public class TextCompressor {
 
         // Fill TST with existing alphabet
         for (int i = 0; i < EOF; i++){
-            trie.insert(String.valueOf(i), i);
+            trie.insert(("" + (char)i), i);
         }
 
         // Read data into a String
@@ -58,19 +49,19 @@ public class TextCompressor {
         while (!text.isEmpty()){
             // Get the prefix
             String prefix = trie.getLongestPrefix(text);
+            int prefixCode = trie.lookup(prefix);
 
             // Add to the output file
-            BinaryStdOut.write(prefix, 12);
+            BinaryStdOut.write(prefixCode, 12);
 
             // If we can look at the next character, add it to the prefix
-            if ((prefix.length() + 1) < text.length() && code < MAX_CODES){
+            if (prefix.length() < text.length() && code < MAX_CODES){
                 trie.insert(text.substring(0, prefix.length() + 1), code);
                 code++;
             }
 
             // Move the text forward to start where the previous prefix ended
             text = text.substring(prefix.length());
-
         }
 
         // Write out EOF indicator
@@ -117,7 +108,7 @@ public class TextCompressor {
             //textValue = nextCode; // Update current codeword.
         }
         // Write out the EOF value
-        BinaryStdOut.write(textValue);
+        BinaryStdOut.write(EOF);
 
         BinaryStdOut.close();
     }
